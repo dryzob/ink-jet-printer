@@ -1,0 +1,58 @@
+clear; clc; close all;
+
+%% 1. Define Constants from the diagram
+Vx = 20;         % Horizontal velocity (m/s)
+D = 3e-3;        % Distance from gun to capacitor (m)
+L1 = 0.5e-3;     % Length of capacitor (m)
+L2 = 1.25e-3;    % Distance from capacitor to paper (m)
+W = 1e-3;        % Plate separation (m)
+
+% Calculate total distance and time
+D_total = D + L1 + L2; % Total horizontal distance to paper
+t_total = D_total / Vx;  % Total time to reach paper
+
+%% 2. Display the Calculated Time
+fprintf('--- Part 1 Solution ---\n');
+fprintf('Total horizontal distance to paper: %.4f mm\n', D_total * 1000);
+fprintf('Time to reach the center of the paper: %f seconds\n', t_total);
+fprintf('Time to reach the center of the paper: %.2f microseconds\n\n', t_total * 1e6);
+
+
+x_vec = linspace(0, D_total, 200);
+
+y_vec = zeros(size(x_vec));
+
+figure;
+hold on;
+
+
+plot(x_vec * 1000, y_vec * 1000, 'b-', 'LineWidth', 1.5);
+
+% Plot the capacitor plates
+% We multiply by 1000 to show all dimensions in mm
+plate_x = [D, D + L1] * 1000;
+plate_y_top = (W / 2) * 1000;
+plate_y_bottom = (-W / 2) * 1000;
+plot(plate_x, [plate_y_top, plate_y_top], 'k', 'LineWidth', 3);
+plot(plate_x, [plate_y_bottom, plate_y_bottom], 'k', 'LineWidth', 3);
+text(D * 1000, plate_y_top + 0.1, 'Capacitor', 'HorizontalAlignment', 'left');
+
+% Plot the paper
+paper_x = D_total * 1000;
+% Paper is 11 inches tall (0.2794 m). We'll just show a segment.
+paper_y = [-5, 5]; % Show +/- 5 mm on the paper
+plot([paper_x, paper_x], paper_y, 'r-', 'LineWidth', 2);
+text(paper_x, 0, '  Paper', 'Color', 'r');
+
+% Formatting
+title('Part 1: Droplet Motion with No Voltage ($V=0$)');
+xlabel('Horizontal Distance (mm)');
+ylabel('Vertical Deflection (mm)');
+legend('Droplet Path', 'Capacitor Plates', 'Location', 'northwest');
+axis equal; % Ensures y-axis and x-axis scales are the same
+grid on;
+hold off;
+
+% Set axes limits to clearly see the path
+xlim([-0.5, (D_total * 1000) + 0.5]);
+ylim([-2, 2]);
