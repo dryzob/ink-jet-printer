@@ -1,0 +1,145 @@
+clear all
+d = 84 * 10^-6;     %Diameter of droplet (m)
+r = 42 * 10^-6;
+D = 3 *10^-3;       %Distance to paper (m)
+vx = 20;       %Velocity in x direction (m/s)
+L1 = 0.5 * 10^-3;   %Length of Capacitor (m)
+L2 = 1.25 * 10^-3;  %Distance between paper and cap (m)
+q = -1.9*10^-10;    %Charge of electron (C)
+pd = 1000;          %Density of droplet (kg/m^3)
+W = 1 *10^-3;       %Diameter between Cap plates (m)
+% V = 10;          %Cap voltage
+vy = 0;
+
+%------Equations------
+T = L1 / vx;        %Droplet time in capacitor
+m = pd * (4/3)*pi*(r)^3;  %Mass of droplet
+% E = V / W;          %Cap electric field
+% ay = q*E/m;         %Vertical acceleration
+% vy = ay * T;        %Vertical velocity
+vf = sqrt(vx^2 + vy^2); %Velocity after exiting Cap
+
+%----Condition values----
+dt = .01;  %Time step
+i = 1;
+u = 1;
+x(1) = 0;
+z(1) = 0;
+o = 1;
+points(1) = 1.898;
+
+%The letter I at font 11 and 300 dpi will be 3.88mm tall
+
+while points(o) > -1.94
+    o = o + 1;
+    points(o) = points(o-1) - d*10^3;
+end
+
+for it = 1:length(points)
+
+V(it) = (points(it)*(10^-3)*m*W)/(dt*T*q);
+
+end
+
+for test = 1:2
+    Vol = V(test);
+    E = Vol / W;
+    ay = q*E/m;
+
+i = 1;
+u = 1;
+x(1) = 0;
+z(1) = 0;
+vy = 0;
+
+while x(u) < 3       %iterations in mm
+    % Update index
+    i = i + 1;
+    u = u + 1;
+
+
+
+    % Calculate new velocities (only y changes)
+    if x(i-1) >= 1.75
+        vy = ay * T;
+    else
+        vy = vy;
+    end
+    %OP(i) = vy;     %vy probe
+
+
+
+    % Calculate new positions
+    x(i) = x(i-1) + vx * dt;
+    z(i) = z(i-1) + vy * dt;
+
+    if x(i) <= 1.75
+        if z(i) <= -0.5 || z(i) >= 0.5
+            disp('Charge hit capacitor')
+            disp(x(i))
+            disp(z(i))
+            break;
+        end
+    end
+end
+z(i)
+y = zeros(size(x)); % Initialize z positions for 3D plot
+
+
+length = .5;
+width = .2;
+height = .05;
+Fa1 = 1.25;     %First face
+
+% Define the vertices of the cuboid
+P = [Fa1, width/2, .5;               %V1
+     1.75, width/2, .5;
+     1.75, -width/2, .5;
+     Fa1, -width/2, .5;           %V4
+     Fa1, width/2, height+.5;          %V5
+     1.75, width/2, height+.5;
+     1.75, -width/2, height+.5;
+     Fa1, -width/2, height+.5];     %V8
+
+Q = [Fa1, width/2, -.5;               %V1
+     1.75, width/2, -.5;
+     1.75, -width/2, -.5;
+     Fa1, -width/2, -.5;           %V4
+     Fa1, width/2, -height-.5;          %V5
+     1.75, width/2, -height-.5;
+     1.75, -width/2, -height-.5;
+     Fa1, -width/2, -height-.5];     %V8
+
+% Create the alphaShape object
+alpha_radius = 3;
+Tcap = alphaShape(P, alpha_radius);
+Bcap = alphaShape(Q, alpha_radius);
+
+figure;
+plot3(x,y,z)
+view(3);
+box on;
+grid on;
+title('Ink Motion');
+xlabel('Horizontal Distance (mm)');
+zlabel('Vertical Distance (mm)');
+hold on;
+
+plot(Tcap);
+plot(Bcap);
+
+xlim([0 3.5]);
+% Animate the projectile
+h = plot3(x(1), y(1), z(1), 'ro', 'MarkerSize', 5, 'MarkerFaceColor', 'r');
+for k = 1:i
+
+    h.XData = x(k);
+    h.ZData = z(k);
+    
+    % set(h, 'XData', x(1,k), 'ZData', z(1,k));
+    drawnow;
+    % pause(0.0000001); % Slow down the animation
+    
+end
+hold off;
+end
