@@ -469,8 +469,6 @@ m = pd * (4/3)*pi*(r)^3;  %Mass of droplet
 
 %----Condition values----
 dt = .000001;  %Time step
-i = 1;
-u = 1;
 o = 1;
 
 % Calculate max Voltage
